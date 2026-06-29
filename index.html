@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       HEADER / NAV
+  ═══════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <!-- Logo + brand -->
+      <div class="brand">
+        <span class="brand-icon">₹</span>
+        <span class="brand-name">Expense Tracker</span>
+      </div>
+
+      <!-- Hamburger for mobile -->
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Nav links -->
+      <nav class="nav-links" id="nav-links">
+        <a href="#dashboard-section" class="nav-link active">Dashboard</a>
+        <a href="#transactions-section" class="nav-link">Transactions</a>
+        <a href="#add-transaction" class="nav-link nav-cta">+ Add</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD SECTION ─── -->
+    <section id="dashboard-section" class="section">
+      <div class="section-header">
+        <h1 class="section-title">Dashboard</h1>
+        <p class="section-subtitle">Your financial overview at a glance</p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-grid">
+        <!-- Balance Card -->
+        <div class="summary-card summary-card--balance">
+          <div class="card-label">Current Balance</div>
+          <div class="card-amount" id="balance-amount">₹0.00</div>
+          <div class="card-trend" id="balance-trend"></div>
+        </div>
+
+        <!-- Income Card -->
+        <div class="summary-card summary-card--income">
+          <div class="card-icon">↑</div>
+          <div class="card-label">Total Income</div>
+          <div class="card-amount" id="income-amount">₹0.00</div>
+        </div>
+
+        <!-- Expense Card -->
+        <div class="summary-card summary-card--expense">
+          <div class="card-icon">↓</div>
+          <div class="card-label">Total Expenses</div>
+          <div class="card-amount" id="expense-amount">₹0.00</div>
+        </div>
+      </div>
+
+      <!-- Balance Bar (visual ratio indicator) -->
+      <div class="balance-bar-wrapper">
+        <div class="balance-bar-label">
+          <span class="bar-label-income">Income</span>
+          <span class="bar-label-expense">Expense</span>
+        </div>
+        <div class="balance-bar" id="balance-bar">
+          <div class="balance-bar__fill" id="balance-bar-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ADD / EDIT TRANSACTION FORM ─── -->
+    <section id="add-transaction" class="section">
+      <div class="section-header">
+        <h2 class="section-title" id="form-title">Add Transaction</h2>
+      </div>
+
+      <!-- Error Banner (hidden by default) -->
+      <div class="error-banner" id="error-banner" role="alert" aria-live="polite" hidden>
+        <span class="error-icon">⚠</span>
+        <span id="error-message"></span>
+        <button class="error-close" id="error-close" aria-label="Dismiss error">✕</button>
+      </div>
+
+      <form class="transaction-form" id="transaction-form" novalidate>
+        <!-- Hidden field: stores ID when editing -->
+        <input type="hidden" id="edit-id" value="" />
+
+        <!-- Row 1: Name + Type -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="txn-name">Transaction Name</label>
+            <input
+              type="text"
+              id="txn-name"
+              class="form-input"
+              placeholder="e.g. Salary, Rent, Groceries"
+              maxlength="60"
+              autocomplete="off"
+            />
+            <span class="field-error" id="name-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="txn-type">Type</label>
+            <select id="txn-type" class="form-input form-select">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 2: Amount + Date -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="txn-amount">Amount (₹)</label>
+            <input
+              type="number"
+              id="txn-amount"
+              class="form-input"
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+            />
+            <span class="field-error" id="amount-error"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="txn-date">Date</label>
+            <input type="date" id="txn-date" class="form-input" />
+            <span class="field-error" id="date-error"></span>
+          </div>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary" id="submit-btn">
+            Add Transaction
+          </button>
+          <button type="button" class="btn btn--ghost" id="cancel-edit-btn" hidden>
+            Cancel Edit
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ─── TRANSACTIONS LIST SECTION ─── -->
+    <section id="transactions-section" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Transactions</h2>
+      </div>
+
+      <!-- Controls Bar: Search + Filter + Sort -->
+      <div class="controls-bar">
+        <!-- Search -->
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search by name…"
+            aria-label="Search transactions"
+          />
+          <button class="search-clear" id="search-clear" aria-label="Clear search" hidden>✕</button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" role="group" aria-label="Filter transactions">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="income">Income</button>
+          <button class="filter-tab" data-filter="expense">Expense</button>
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="sort-wrapper">
+          <label class="sort-label" for="sort-select">Sort:</label>
+          <select id="sort-select" class="form-input sort-select">
+            <option value="date-desc">Date (Newest)</option>
+            <option value="date-asc">Date (Oldest)</option>
+            <option value="amount-desc">Amount (High→Low)</option>
+            <option value="amount-asc">Amount (Low→High)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <p class="results-count" id="results-count"></p>
+
+      <!-- Transaction List -->
+      <ul class="transaction-list" id="transaction-list" aria-label="Transaction list">
+        <!-- Populated by ui.js → renderTransactions() -->
+      </ul>
+
+      <!-- Empty State (shown when no transactions match) -->
+      <div class="empty-state" id="empty-state" hidden>
+        <div class="empty-icon">📭</div>
+        <h3 class="empty-title">No transactions found</h3>
+        <p class="empty-text" id="empty-text">
+          Add your first transaction using the form above.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       DELETE CONFIRMATION MODAL
+  ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" hidden role="dialog"
+       aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h3 class="modal-title" id="modal-title">Delete Transaction?</h3>
+      <p class="modal-body">
+        This action cannot be undone. The transaction
+        "<strong id="modal-txn-name"></strong>" will be permanently removed.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn--danger" id="modal-confirm-btn">Yes, Delete</button>
+        <button class="btn btn--ghost" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOAST NOTIFICATION
+  ═══════════════════════════════════════════ -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <p>FinTrack · JavaScript Capstone Project · Built with Vanilla JS &amp; ❤️</p>
+  </footer>
+
+  <!-- Scripts — order matters: state → storage → ui → events -->
+  <script src="state.js"></script>
+  <script src="storage.js"></script>
+  <script src="ui.js"></script>
+  <script src="events.js"></script>
+
+</body>
+</html>
